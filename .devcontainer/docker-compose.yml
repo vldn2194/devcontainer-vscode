@@ -1,0 +1,113 @@
+name: the-project
+services:
+  app:
+    container_name: app
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspaces/the-project:cached
+      - the-project-mvn:/home/vscode/.m2
+      - the-project-claude:/home/vscode/.claude
+      - the-project-vscode-extensions:/home/vscode/.vscode-server/extensions
+      - the-project-vscode-data:/home/vscode/.vscode-server/data
+      - .gitconfig:/home/vscode/.gitconfig:cached,ro
+      - ${HOME}/.ssh:/home/vscode/.ssh:cached,ro
+    environment:
+      - JAVA_HOME=/opt/java/openjdk
+      - MAVEN_HOME=/usr/share/maven
+      - PATH=/opt/java/openjdk/bin:/usr/share/maven/bin:${PATH}
+      # DOCKER_HOST is needed to connect to the docker-socket-proxy service
+      # which provides secure access to the Docker daemon from within the container
+      - DOCKER_HOST=tcp://docker-socket-proxy:2375
+      # TESTCONTAINERS_HOST_OVERRIDE is needed to tell TestContainers how to reach
+      # the host machine from within the container for port forwarding
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+      # Database configuration for the application (DB_HOST=database for devcontainer)
+      - DB_HOST=database
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
+    command: sleep infinity
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: 4
+          memory: 4G
+        reservations:
+          cpus: 2
+          memory: 2G
+    networks:
+      - local-network
+    depends_on:
+      - database
+      - docker-socket-proxy
+
+  # The docker socket proxy documentation 
+  # https://github.com/Tecnativa/docker-socket-proxy?tab=readme-ov-file#available-scopes
+  docker-socket-proxy:
+    container_name: docker-socket-proxy
+    image: ghcr.io/tecnativa/docker-socket-proxy:0.3.0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - LOG_LEVEL=debug  # Set logging level to debug for troubleshooting
+      # Container operations
+      - CONTAINERS=1     # Allow listing and managing containers
+      # Image operations
+      - IMAGES=1         # Allow listing and managing images
+      # System operations
+      - INFO=1           # Allow basic Docker info
+      - VERSION=1        # Allow version info
+      # Additional permissions that might be needed
+      - POST=1           # Allow POST operations (needed for container creation)
+    ports:
+      - "2375:2375"
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 30M
+        reservations:
+          cpus: 0.15
+          memory: 15M
+    networks:
+      - local-network
+
+  database:
+    container_name: database
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - the-project-db:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 2G
+        reservations:
+          cpus: 0.5
+          memory: 1G
+    networks:
+      - local-network
+
+volumes:
+  the-project-mvn:
+  the-project-claude:
+  the-project-db: 
+  the-project-vscode-extensions:
+  the-project-vscode-data:
+
+networks:
+  local-network:

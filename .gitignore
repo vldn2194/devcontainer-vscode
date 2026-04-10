@@ -1,0 +1,7 @@
+.DS_Store
+target/
+.env
+.gitconfig
+.tool-versions
+.vscode/settings.json
+.claude

@@ -1,0 +1,11 @@
+{
+    "window.zoomLevel": 0.5,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "testing.automaticallyOpenTestResults": "neverOpen",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "[java]": {
+        "editor.defaultFormatter": "josevseb.google-java-format-for-vs-code"
+    },
+    "remote.autoForwardPorts": false
+} 

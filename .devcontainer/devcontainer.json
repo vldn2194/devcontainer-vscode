@@ -1,0 +1,23 @@
+{
+  "name": "The Project",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "customizations": {
+      "vscode": {
+          "extensions": [
+            "vscjava.vscode-java-pack",
+            "josevseb.google-java-format-for-vs-code",
+            "ms-azuretools.vscode-docker",
+            "adamraichu.zip-viewer",
+            "vmware.vscode-spring-boot",
+            "GitHub.copilot-chat",
+            "Anthropic.claude-code",
+            "ms-vscode-remote.vscode-remote-extensionpack",
+            "redhat.vscode-xml"
+          ],
+          "otherPortsAttributes": { "onAutoForward" : "ignore" }
+
+      }
+  }
+}
